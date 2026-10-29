@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import appColors from '../../../../../theme/appColors'
 import styles from './styles'
 import { Button } from '../../../../../commonComponents'
@@ -49,16 +49,9 @@ export function LoginView({
   const { colors } = useTheme()
   const { textRtlStyle, viewRtlStyle, isDark, rtl } = useValues()
   const dispatch = useDispatch<AppDispatch>()
-  const { translateData, taxidoSettingData, settingData } = useSelector(
+  const { translateData, settingData } = useSelector(
     (state: any) => state.setting,
   )
-
-  useEffect(() => {
-    const code = taxidoSettingData?.cabbooking_values?.ride?.country_code
-    if (code && setCountryCode) {
-      setCountryCode(`+${String(code).replace(/^\+/, '')}`)
-    }
-  }, [taxidoSettingData])
 
   useFocusEffect(
     useCallback(() => {

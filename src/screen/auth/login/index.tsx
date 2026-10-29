@@ -20,25 +20,21 @@ import {
 } from '../../../api/interface/authInterface'
 import { getValue, setValue } from '../../../utils/localstorage'
 import { useAppNavigation } from '../../../utils/navigation'
-import { getFcmToken } from '../../../utils/pushNotificationHandler'
+import { getFCMToken } from '../../../utils/pushNotificationHandler'
 
-import { getAllCountries } from 'react-native-country-select/lib/utils/countryHelpers'
 import { GoogleSignin, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin'
 import { selfDriverData, socialLogin } from '../../../api/store/action'
 import { SocialLoginInterface } from '../../../api/interface/authInterface'
 
 export function Login() {
-  const { translateData, taxidoSettingData } = useSelector((state: any) => state.setting)
+  const { translateData } = useSelector((state: any) => state.setting)
   const [cca2, setCca2] = useState('IN')
   const { isDark, Google_Sign_Key, setToken } = useValues()
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useAppNavigation()
   const [phoneNumber, setPhoneNumber] = useState<string>('')
   const [loginError, setLoginError] = useState('')
-  const defaultCountryCode = `${taxidoSettingData?.cabbooking_values?.ride?.country_code || ''}`
-  const [countryCode, setCountryCode] = useState(
-    defaultCountryCode ? `+${defaultCountryCode.replace(/^\+/, '')}` : '+91',
-  )
+  const [countryCode, setCountryCode] = useState('+91')
   const [demouser, setDemouser] = useState<boolean>(false)
   const [fcmToken, setFcmToken] = useState<string>('')
   const isFocused = useIsFocused()
@@ -122,7 +118,7 @@ export function Login() {
         if (token) {
           setFcmToken(token)
         } else {
-          const newToken = await getFcmToken()
+          const newToken = await getFCMToken()
           if (newToken) {
             setFcmToken(newToken)
             await setValue('fcmToken', newToken)
@@ -193,34 +189,6 @@ export function Login() {
       fcmToken,
     ],
   )
-
-  useEffect(() => {
-    const fetchCountryFromCode = async () => {
-      const code = taxidoSettingData?.cabbooking_values?.ride?.country_code
-
-      if (code) {
-        try {
-          const countries = await getAllCountries()
-          const normalizedCode = String(code).replace(/^\+/, '')
-          const match = normalizedCode === '1'
-            ? countries.find(c => c.cca2 === 'US')
-            : countries.find(
-            c =>
-              c.idd.root === `+${normalizedCode}` ||
-              `${c.idd.root}${c.idd.suffixes?.[0] || ''}` ===
-                `+${normalizedCode}`,
-          )
-
-          if (match) {
-            setCountryCode(`+${normalizedCode}`)
-            setCca2(match.cca2)
-          }
-        } catch (err) { }
-      }
-    }
-
-    fetchCountryFromCode()
-  }, [taxidoSettingData?.cabbooking_values?.ride?.country_code])
 
   const gotoOTPFleet = useCallback(
     async (userType: string) => {
