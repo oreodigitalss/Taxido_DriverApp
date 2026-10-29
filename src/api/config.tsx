@@ -1,7 +1,6 @@
-// Production HTTPS host. Android release builds block cleartext HTTP, so a
-// local development URL must only be selected for a debug build.
-// Keep the API host aligned with Taxido_User; the www host does not expose the same API routes.
-export const URL = 'https://rydap.com'
+// Use the www host: it serves the API routes and has a valid TLS certificate.
+// Android debug builds reach the host's local Laravel server through `adb reverse`.
+export const URL = __DEV__ ? "http://localhost:8000" : "https://www.rydap.com";
 export const API_HOST_HEADER = undefined
 
 export const ENABLE_GLOBAL_RATE_LIMIT = true
