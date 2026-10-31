@@ -857,20 +857,20 @@ window.onload = initMap;
     DEFAULT_LAT,
     DEFAULT_LNG,
   ]);
-  const webViewSource = React.useMemo(
-    () => ({
-      // The app currently ships a placeholder Google Maps key. Keep the
-      // dashboard map visible by using the existing OSM renderer until a
-      // real Google Maps JavaScript key is configured.
+  const webViewSource = React.useMemo(() => {
+    // The Android app key is restricted to native Maps SDKs, not Maps JavaScript in a WebView.
+    const hasGoogleMapsJavascriptKey =
+      Platform.OS !== "android" &&
+      Boolean(Google_Map_Key?.trim()) &&
+      !Google_Map_Key.toLowerCase().includes("enter your google map key");
+
+    return {
       html:
-        mapType === "osm" ||
-        !Google_Map_Key?.trim() ||
-        Google_Map_Key.toLowerCase().includes("enter your google map key")
+        mapType === "osm" || !hasGoogleMapsJavascriptKey
           ? osmHtmlContent
           : googleHtmlContent,
-    }),
-    [mapType, Google_Map_Key, osmHtmlContent, googleHtmlContent],
-  );
+    };
+  }, [mapType, Google_Map_Key, osmHtmlContent, googleHtmlContent]);
 
   // Render stable container. WebView source will only load when coords are available.
   const showMap = DEFAULT_LAT !== null && DEFAULT_LNG !== null;
