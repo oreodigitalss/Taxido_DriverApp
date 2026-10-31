@@ -39,9 +39,11 @@ export const AppContextProvider = (props: any) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
   const [notificationValue, setNotificationValues] = useState(false);
   const [categoryIndex, setCategoryIndex] = useState<number>(null)
+  // Keep the native map, geocoding, directions and Distance Matrix clients on
+  // the same Android-restricted project key used by the rider app.
   const Google_Map_Key = Platform.OS == 'android'
-    ? 'Enter Your Google Map Keye Here'
-    : 'Enter Your Google Map Keye Here'
+    ? 'AIzaSyBHrVo65y5tIjYZt4bfyWBq7iuY5f6GJAI'
+    : 'Enter Your Google Map Key Here'
   // Use the Web OAuth client ID configured in google-services.json.
   const Google_Sign_Key = '185030684517-67lt0kf6vak18k4vqqv2n3u4i898msue.apps.googleusercontent.com'
 

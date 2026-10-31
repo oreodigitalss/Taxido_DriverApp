@@ -2,11 +2,12 @@ import Echo from 'laravel-echo';
 import { getValue } from './localstorage';
 import { URL } from '../api/config';
 
-
 // @ts-ignore
-const PusherClient = require('pusher-js/react-native').Pusher || require('pusher-js/react-native');
+const PusherClient =
+  require('pusher-js/react-native').Pusher ||
+  require('pusher-js/react-native');
 
-PusherClient.logToConsole = true;
+PusherClient.logToConsole = __DEV__;
 
 // @ts-ignore
 window.Pusher = PusherClient;
@@ -14,15 +15,12 @@ window.Pusher = PusherClient;
 let echoInstance: any = null;
 let cachedToken: string | null = null;
 
-// Set these to the Pusher/Reverb app credentials used by the Laravel backend.
-// Leaving them empty keeps Echo from passing the template values below to URL().
-const PUSHER_KEY = 'yrtdtapyoopzf7p46ved';
-const PUSHER_HOST = 'rydap.com';
+const PUSHER_KEY = '32b114c5d9838fa6aa28';
 
 const getEchoInstance = async () => {
-  if (!PUSHER_KEY.trim() || !PUSHER_HOST.trim()) {
+  if (!PUSHER_KEY.trim()) {
     console.warn(
-      '[Echo] Realtime is disabled: configure PUSHER_KEY and PUSHER_HOST in src/utils/echo.ts.',
+      '[Echo] Realtime is disabled: configure PUSHER_KEY in src/utils/echo.ts.',
     );
     return null;
   }
@@ -37,7 +35,7 @@ const getEchoInstance = async () => {
     try {
       echoInstance.disconnect();
     } catch (e) {
-      console.error("Error disconnecting stale Echo instance:", e);
+      console.error('Error disconnecting stale Echo instance:', e);
     }
   }
 
@@ -46,12 +44,9 @@ const getEchoInstance = async () => {
   echoInstance = new Echo({
     broadcaster: 'pusher',
     key: PUSHER_KEY,
-    wsHost: PUSHER_HOST,
-    wsPort: 443,
-    wssPort: 443,
+    cluster: 'ap2',
     forceTLS: true,
     disableStats: true,
-    cluster: 'mt1',
     enabledTransports: ['ws', 'wss'],
     Pusher: PusherClient,
     authEndpoint: `${URL}/api/broadcasting/auth`,
@@ -63,20 +58,24 @@ const getEchoInstance = async () => {
     },
   });
 
-  if (echoInstance.connector.pusher) {
-    echoInstance.connector.pusher.connection.bind('state_change', (states: any) => {
-      console.log(`[Echo] Connection state changed from ${states.previous} to ${states.current}`);
+  const connection = echoInstance.connector?.pusher?.connection;
+
+  if (connection) {
+    connection.bind('state_change', (states: any) => {
+      console.log(
+        `[Echo] Connection state changed from ${states.previous} to ${states.current}`,
+      );
     });
-    echoInstance.connector.pusher.connection.bind('error', (err: any) => {
+
+    connection.bind('error', (err: any) => {
       console.error('[Echo] Connection error:', err);
-      if (err?.error?.data?.code === 4004) {
-        console.error('[Echo] Critical: Pusher app not found or wrong credentials.');
-      }
     });
-    echoInstance.connector.pusher.connection.bind('connected', () => {
-      console.log('[Echo] Connected! Socket ID:', echoInstance.socketId());
+
+    connection.bind('connected', () => {
+      console.log('[Echo] Connected! Socket ID:', echoInstance?.socketId());
     });
-    echoInstance.connector.pusher.connection.bind('disconnected', () => {
+
+    connection.bind('disconnected', () => {
       console.log('[Echo] Disconnected.');
     });
   }
@@ -89,6 +88,8 @@ export const disconnectEcho = () => {
     echoInstance.disconnect();
     echoInstance = null;
   }
+
+  cachedToken = null;
 };
 
 export default getEchoInstance;
